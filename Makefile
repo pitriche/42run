@@ -6,7 +6,7 @@
 #    By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/02/07 14:21:44 by pitriche          #+#    #+#              #
-#    Updated: 2021/07/08 11:27:14 by pitriche         ###   ########.fr        #
+#    Updated: 2021/07/13 10:41:12 by pitriche         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,19 +24,19 @@ RESET	= \033[0m
 NAME = 42run
 
 CLASSES=	\
-# All		\
-# Display	\
-# Event	\
-# Time	\
-# Utils	\
-# OpenGL	\
-# OpenCL	\
+All		\
+Display	\
+Event	\
+Game	\
+OpenGL	\
+Time	\
+Utils	\
 
 CLASSES_HEADERS= $(addsuffix .hpp, $(CLASSES))
 CLASSES_SRCS= $(addsuffix .cpp, $(CLASSES))
 
 HEADERS = $(CLASSES_HEADERS) \
-# Defines.hpp	\
+Defines.hpp	\
 
 SRC_FILES = $(CLASSES_SRCS)	\
 main.cpp		\
