@@ -6,11 +6,12 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:14:54 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/13 17:39:26 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/07/19 15:38:18 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Game.hpp"
+#include "All.hpp"
 
 Game::Game(void) { }
 Game::~Game(void) { }
@@ -26,11 +27,14 @@ void	Game::init(void)
 void		Game::update(float delta, const Keys &key)
 {
 	float	disp_x;
-
+	
+	/* lateral movements */
 	disp_x = delta * X_SPEED;
 	if (this->input_left && this->pos_x > -1.0)
 	{
 		this->pos_x -= disp_x;
+		if (this->pos_x < -1.0)
+			this->pos_x = -1.0;
 		if (this->pos_x <= 0.0f && this->pos_x + disp_x > 0.0f)
 		{
 			this->pos_x = 0.0f;
@@ -40,6 +44,8 @@ void		Game::update(float delta, const Keys &key)
 	else if (this->input_right && this->pos_x < 1.0)
 	{
 		this->pos_x += disp_x;
+		if (this->pos_x > 1.0)
+			this->pos_x = 1.0;
 		if (this->pos_x >= 0.0f && this->pos_x - disp_x < 0.0f)
 		{
 			this->pos_x = 0.0f;
@@ -47,16 +53,11 @@ void		Game::update(float delta, const Keys &key)
 		}
 	}
 
-	/* lock pos_x in [-1;1] range */
-	if (this->pos_x < -1.0)
-		this->pos_x = -1.0;
-	if (this->pos_x > 1.0)
-		this->pos_x = 1.0;
-
+	/* jumps and crouch */
 	if ((key.space || key.up || key.w) && this->pos_y <= 0.0f)
 	{
 		this->pos_y = 0.01f;
-		this->vel_y = 3.0f;
+		this->vel_y = 2.0f;
 	}
 	if (this->pos_y > 0.0f)
 	{
@@ -69,4 +70,18 @@ void		Game::update(float delta, const Keys &key)
 		this->pos_y = -1.0f;
 	if (!(key.down || key.s || key.down) && this->pos_y == -1.0f)
 		this->pos_y = 0.0f;
+
+
+	/* update matrix */
+	float	tmp_mat[] =
+	{
+		1.0f, 0.0f, 0.0f, this->pos_x * 0.8f,
+		0.0f, 1.0f, 0.0f, this->pos_y * 3.5f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
+	if (this->pos_y == -1)
+		tmp_mat[7] = 0;
+	
+	glUniformMatrix4fv(all.gl.uniform.matrix_pos, 1, true, tmp_mat);
 }

@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:14:54 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/13 10:21:51 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/07/20 15:28:15 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,27 +15,64 @@
 #include "Defines.hpp"
 #include "Utils.hpp"
 
-OpenGL::OpenGL(void) : window(0), glcontext(0), vao(0), vbo(0) { }
-
-_Uniform::_Uniform(void) : particle_color(0), cursor_position(0),
-	reference_length(0) { }
-_Attribute::_Attribute(void) : position_vertex(0) { }
-_Shader::_Shader(void) : vertex(0), fragment(0), program(0) { }
+OpenGL::OpenGL(void) { }
 
 /* ########################################################################## */
 
-void	OpenGL::_init_vao(void)
+void	OpenGL::_init_vao_terrain(void)
 {
-	glGenVertexArrays(1, &this->vao);
-	glBindVertexArray(this->vao);
-	std::cout << "VAO: [" << this->vao << "/1]\t";
+	/* init and load vao */
+	glGenVertexArrays(1, &this->terrain.vao);
+	glBindVertexArray(this->terrain.vao);
+	std::cout << "Terrain   VAO:[" << this->terrain.vao << "/2] ";
+
+	/* init and fill vbo */
+	glGenBuffers(1, &this->terrain.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, this->terrain.vbo);
+	std::cout << "VBO:[" << this->terrain.vbo << "/2]" << std::endl;
+	float	tmp_data[] = 
+	{
+		-0.3f, 0.2f, 0.0f,
+		0.2f, 0.2f, 0.0f,
+		0.2f, 0.8f, 0.0f,
+		-0.2f, 0.7f, 0.0f
+	};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tmp_data), tmp_data, GL_STATIC_DRAW);
+
+	/* init attributes */
+	this->terrain.att.position_vertex =
+	(GLuint)glGetAttribLocation(this->shader.program, "position_vertex");
+	glVertexAttribPointer(this->terrain.att.position_vertex, 3, GL_FLOAT, GL_FALSE,
+		sizeof(float) * 3, (void *)(0));
+	glEnableVertexAttribArray(this->terrain.att.position_vertex);
 }
 
-void	OpenGL::_init_vbo(void)
+void	OpenGL::_init_vao_player(void)
 {
-	glGenBuffers(1, &this->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-	std::cout << "VBO: [" << this->vbo << "/1]\t";
+	/* init and load vao */
+	glGenVertexArrays(1, &this->character.vao);
+	glBindVertexArray(this->character.vao);
+	std::cout << "Character VAO:[" << this->character.vao << "/1] ";
+
+	/* init and fill vbo */
+	glGenBuffers(1, &this->character.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, this->character.vbo);
+	std::cout << "VBO:[" << this->character.vbo << "/1]" << std::endl;
+	float	tmp_data[] = 
+	{
+		-0.2f, 0.2f, 0.0f,
+		0.2f, 0.2f, 0.0f,
+		0.2f, -0.2f, 0.0f,
+		-0.2f, -0.2f, 0.0f
+	};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tmp_data), tmp_data, GL_STATIC_DRAW);
+
+	/* init attributes */
+	this->character.att.position_vertex =
+	(GLuint)glGetAttribLocation(this->shader.program, "position_vertex");
+	glVertexAttribPointer(this->character.att.position_vertex, 3, GL_FLOAT, GL_FALSE,
+		sizeof(float) * 3, (void *)(0));
+	glEnableVertexAttribArray(this->character.att.position_vertex);
 }
 
 /* ########################################################################## */
@@ -63,9 +100,9 @@ static GLuint compile_shader(const char *filename, GLenum type)
 
 void	OpenGL::_init_shader(void)
 {
-	this->shader.vertex = compile_shader("shader/vertex_shader.glsl",
+	this->shader.vertex = compile_shader("shader/vertex_character.glsl",
 		GL_VERTEX_SHADER);
-	this->shader.fragment = compile_shader("shader/fragment_shader.glsl",
+	this->shader.fragment = compile_shader("shader/fragment_character.glsl",
 		GL_FRAGMENT_SHADER);
 
 	/* create shader program and attach shaders */
@@ -82,31 +119,28 @@ void	OpenGL::_init_shader(void)
 
 /* ########################################################################## */
 
-void	OpenGL::_init_attribute(void)
-{
-	this->attribute.position_vertex =
-	(GLuint)glGetAttribLocation(this->shader.program, "position_vertex");
-	glVertexAttribPointer(this->attribute.position_vertex, 3, GL_FLOAT, GL_FALSE,
-		sizeof(float) * 3, (void *)(0));
-	glEnableVertexAttribArray(this->attribute.position_vertex);
-}
 
 void	OpenGL::_init_uniform(void)
 {
-	this->uniform.particle_color = glGetUniformLocation(this->shader.program,
-		"particle_color");
-	glUniform3f(this->uniform.particle_color, 0.85f, 0.85f, 1.0f);
+	float	tmp_mat[] =
+	{
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
 
-	this->uniform.cursor_position = glGetUniformLocation(this->shader.program,
-		"cursor_position");
-
-	this->uniform.reference_length = glGetUniformLocation(this->shader.program,
-		"reference_length");
-	glUniform1f(this->uniform.reference_length, 1.0f);
+	this->uniform.matrix_pos = glGetUniformLocation(this->shader.program,
+		"matrix_pos");
+	glUniformMatrix4fv(this->uniform.matrix_pos, 1, true, tmp_mat);
 
 	this->uniform.screen_ratio = glGetUniformLocation(this->shader.program,
 		"screen_ratio");
 	glUniform1f(this->uniform.screen_ratio, WIN_SIZEX / (float)WIN_SIZEY);
+
+	this->uniform.crouch = glGetUniformLocation(this->shader.program,
+		"crouch");
+	glUniform1i(this->uniform.crouch, 0);
 }
 
 /* ########################################################################## */
@@ -114,14 +148,14 @@ void	OpenGL::_init_uniform(void)
 void	OpenGL::init(SDL_Window *window)
 {
 	/* create OpenGL context */
-	// this->glcontext = SDL_GL_CreateContext(window);
-	// printf("Supported OpenGL version: %s\nUsing OpenGL %d.%d\n\n",
-	// 	glGetString(GL_VERSION), OPENGL_VERSION_MAJOR, OPENGL_VERSION_MINOR);
+	this->glcontext = SDL_GL_CreateContext(window);
+	printf("Supported OpenGL version: %s\nUsing OpenGL %d.%d\n\n",
+		glGetString(GL_VERSION), OPENGL_VERSION_MAJOR, OPENGL_VERSION_MINOR);
 
-	// this->_init_vao();
-	// this->_init_vbo();
-	// this->_init_shader();
-	// this->_init_attribute();
-	// this->_init_uniform();
-	// glEnable(GL_DEPTH_TEST);
+	this->_init_shader();
+	this->_init_uniform();
+	this->_init_vao_player();
+	this->_init_vao_terrain();
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }

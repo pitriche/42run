@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/19 21:03:42 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/13 17:52:19 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/07/19 15:32:50 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,24 +23,32 @@ void	Event::_keychange(SDL_Keycode kc, unsigned key_state)
 	{
 		// ADD WASD SUPPORT
 		case (SDLK_w): this->key.w = key_state; break;
-		case (SDLK_s): this->key.s = key_state; break;
 		case (SDLK_UP): this->key.up = key_state; break;
-		case (SDLK_DOWN): this->key.down = key_state; break;
 		case (SDLK_LEFT): case (SDLK_a):
-			if (key_state)
+			if (key_state && all.game.pos_y != -1.0)
 			{
 				all.game.input_left++;
 				all.game.input_right = 0;
 			}
 			break;
 		case (SDLK_RIGHT): case (SDLK_d):
-			if (key_state)
+			if (key_state && all.game.pos_y != -1.0)
 			{
 				all.game.input_right++;
 				all.game.input_left = 0;
 			}
 			break;
 		case (SDLK_SPACE): this->key.space = key_state; break;
+		
+		case (SDLK_s):
+			this->key.s = key_state; 
+			glUniform1i(all.gl.uniform.crouch, (GLint)key_state);
+			break;
+		case (SDLK_DOWN):
+			this->key.down = key_state;
+			glUniform1i(all.gl.uniform.crouch, (GLint)key_state);
+			break;
+
 		case (SDLK_ESCAPE): exit(0); break;
 	}
 }

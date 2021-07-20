@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/19 21:03:42 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/13 10:22:50 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/07/20 15:40:54 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,19 @@ void	Display::init(void)
 void	Display::update(void)
 {
 	/* clear screen and depth buffer */
-	// glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/* draw particles from VBO and wait for finish */
-	// glDrawArrays(GL_POINTS, 0, PARTICLES);
-	// glFinish();
+	/* draw character */
+	glBindVertexArray(all.gl.character.vao);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-	// SDL_GL_SwapWindow(this->window);
+	/* draw terrain */
+	glBindVertexArray(all.gl.terrain.vao);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+	/* sync gpu-cpu then update the window */
+	glFinish();
+	SDL_GL_SwapWindow(this->window);
 }
 
 void	Display::operator=(const Display &) { }
