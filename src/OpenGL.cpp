@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:14:54 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/20 15:28:15 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/-/27 12:54:54 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 OpenGL::OpenGL(void) { }
 
 /* ########################################################################## */
+/* #####################			Buffers				##################### */
+/* ########################################################################## */
 
 void	OpenGL::_init_vao_terrain(void)
 {
@@ -26,16 +28,18 @@ void	OpenGL::_init_vao_terrain(void)
 	glBindVertexArray(this->terrain.vao);
 	std::cout << "Terrain   VAO:[" << this->terrain.vao << "/2] ";
 
-	/* init and fill vbo */
+	/* init and fill vbo with cube data */
 	glGenBuffers(1, &this->terrain.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, this->terrain.vbo);
 	std::cout << "VBO:[" << this->terrain.vbo << "/2]" << std::endl;
 	float	tmp_data[] = 
 	{
-		-0.3f, 0.2f, 0.0f,
-		0.2f, 0.2f, 0.0f,
-		0.2f, 0.8f, 0.0f,
-		-0.2f, 0.7f, 0.0f
+		1,	1,	-1,	1,	-1,	-1,	-1,	-1,	-1,	-1,	1,	-1,
+		1,	1,	1,	1,	-1,	1,	-1,	-1,	1,	-1,	1,	1,
+		1,	-1,	1,	-1,	-1,	1,	-1,	-1,	-1,	1,	-1,	-1,
+		1,	1,	1,	-1,	1,	1,	-1,	1,	-1,	1,	1,	-1,
+		-1,	1,	1,	-1,	-1,	1,	-1,	-1,	-1,	-1,	1,	-1,
+		1,	1,	1,	1,	-1,	1,	1,	-1,	-1,	1,	1,	-1,
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(tmp_data), tmp_data, GL_STATIC_DRAW);
 
@@ -60,10 +64,10 @@ void	OpenGL::_init_vao_player(void)
 	std::cout << "VBO:[" << this->character.vbo << "/1]" << std::endl;
 	float	tmp_data[] = 
 	{
-		-0.2f, 0.2f, 0.0f,
-		0.2f, 0.2f, 0.0f,
-		0.2f, -0.2f, 0.0f,
-		-0.2f, -0.2f, 0.0f
+		-0.2f,	0.2f,	0.0f,
+		0.2f,	0.2f,	0.0f,
+		0.2f,	-0.2f,	0.0f,
+		-0.2f,	-0.2f,	0.0f
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(tmp_data), tmp_data, GL_STATIC_DRAW);
 
@@ -75,6 +79,8 @@ void	OpenGL::_init_vao_player(void)
 	glEnableVertexAttribArray(this->character.att.position_vertex);
 }
 
+/* ########################################################################## */
+/* #####################			Shaders				##################### */
 /* ########################################################################## */
 
 static GLuint compile_shader(const char *filename, GLenum type)
@@ -100,9 +106,9 @@ static GLuint compile_shader(const char *filename, GLenum type)
 
 void	OpenGL::_init_shader(void)
 {
-	this->shader.vertex = compile_shader("shader/vertex_character.glsl",
+	this->shader.vertex = compile_shader("shader/vertex.glsl",
 		GL_VERTEX_SHADER);
-	this->shader.fragment = compile_shader("shader/fragment_character.glsl",
+	this->shader.fragment = compile_shader("shader/fragment.glsl",
 		GL_FRAGMENT_SHADER);
 
 	/* create shader program and attach shaders */
@@ -118,31 +124,60 @@ void	OpenGL::_init_shader(void)
 }
 
 /* ########################################################################## */
-
+/* #####################		Uniforms & Data			##################### */
+/* ########################################################################## */
 
 void	OpenGL::_init_uniform(void)
 {
-	float	tmp_mat[] =
-	{
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	};
-
-	this->uniform.matrix_pos = glGetUniformLocation(this->shader.program,
-		"matrix_pos");
-	glUniformMatrix4fv(this->uniform.matrix_pos, 1, true, tmp_mat);
+	this->uniform.object = glGetUniformLocation(this->shader.program, "object");
 
 	this->uniform.screen_ratio = glGetUniformLocation(this->shader.program,
 		"screen_ratio");
 	glUniform1f(this->uniform.screen_ratio, WIN_SIZEX / (float)WIN_SIZEY);
 
+	/* character */
+	this->uniform.matrix_char_pos = glGetUniformLocation(this->shader.program,
+		"matrix_char_pos");
 	this->uniform.crouch = glGetUniformLocation(this->shader.program,
 		"crouch");
 	glUniform1i(this->uniform.crouch, 0);
+
+	/* terrain */
+	this->uniform.matrix_proj = glGetUniformLocation(this->shader.program,
+		"matrix_proj");
+	this->uniform.matrix_view = glGetUniformLocation(this->shader.program,
+		"matrix_view");
+	this->uniform.matrix_model = glGetUniformLocation(this->shader.program,
+		"matrix_model");
+
+	this->uniform.color = glGetUniformLocation(this->shader.program,
+		"color");
 }
 
+void	OpenGL::_init_matrix(void)
+{
+	this->matrix_model = Matrix();
+	
+
+	/* set the camera to face positive Z and stand back */
+	this->matrix_view = Matrix();
+	this->matrix_view.translate(0, -1.2f, 6.0f);
+	this->matrix_view.rotate(0.1f, (float)M_PI, 0);
+
+	this->matrix_proj.set_projection((float)M_PI * CAMERA_FOV / 360.0f,
+		CAMERA_NEAR, CAMERA_FAR, (float)WIN_SIZEX / WIN_SIZEY);
+
+	glUniformMatrix4fv(this->uniform.matrix_model, 1, 0,
+		this->matrix_model.data());
+
+	glUniformMatrix4fv(this->uniform.matrix_view, 1, true,
+		this->matrix_view.data());
+	glUniformMatrix4fv(this->uniform.matrix_proj, 1, true,
+		this->matrix_proj.data());
+}
+
+/* ########################################################################## */
+/* #####################			Main init			##################### */
 /* ########################################################################## */
 
 void	OpenGL::init(SDL_Window *window)
@@ -156,6 +191,8 @@ void	OpenGL::init(SDL_Window *window)
 	this->_init_uniform();
 	this->_init_vao_player();
 	this->_init_vao_terrain();
+	this->_init_matrix();
+
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }

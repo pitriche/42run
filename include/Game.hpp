@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:13:45 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/19 14:24:11 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/26 14:55:07 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,25 @@
 # define GAME_HPP
 
 # include "Event.hpp"	/* Keys */
+# include <vector>
+# include <array>
 
-# define	X_SPEED 6.0f
+# define	X_SPEED 10.0f
+
+typedef		std::array<float, 3> vec3;
+
+struct Sector
+{
+	Sector(void);
+
+	unsigned			nb;
+	std::vector<vec3>	cube_pos;
+	std::vector<float>	cube_size;
+
+	float				pos;	/* sector position */
+
+	Sector	&operator=(const Sector &rhs);
+};
 
 struct Game
 {
@@ -29,11 +46,17 @@ struct Game
 		float		pos_x;
 		float		pos_y;
 		float		vel_y;
+		float		crouch;
 
-		unsigned	input_left;	
-		unsigned	input_right;	
+		Sector		sector;
+		Sector		sector_next;
+
+		unsigned	input_left;
+		unsigned	input_right;
 
 	private:
+		void	_update_matrices(float delta);
+		bool	_check_collision(void);
 };
 
 #endif

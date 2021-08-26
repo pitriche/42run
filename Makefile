@@ -6,7 +6,7 @@
 #    By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/02/07 14:21:44 by pitriche          #+#    #+#              #
-#    Updated: 2021/07/13 10:41:12 by pitriche         ###   ########.fr        #
+#    Updated: 2021/07/23 11:29:25 by pitriche         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,6 +28,7 @@ All		\
 Display	\
 Event	\
 Game	\
+Matrix	\
 OpenGL	\
 Time	\
 Utils	\

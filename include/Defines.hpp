@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/22 13:52:16 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/13 10:29:11 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/07/29 09:28:51 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,5 +23,10 @@
 # define WIN_POSY	50
 
 # define BASE_FPS	60	/* 0 for unlimited */
+
+
+# define CAMERA_FOV		60.0f
+# define CAMERA_NEAR	1.0f
+# define CAMERA_FAR		50.0f
 
 #endif

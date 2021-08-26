@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/19 09:29:13 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/19 14:27:24 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/07/26 11:35:35 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ static void	loop(void)
 	all.time.update();
 	all.game.update(all.time.delta / 1000000000.0f, all.event.key);
 }
+
+#include "Matrix.hpp"
 
 int			main(void)
 {

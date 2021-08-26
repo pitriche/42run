@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:13:45 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/20 15:16:13 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/26 12:14:39 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,21 @@
 
 # include <OpenGL/gl3.h>
 # include <SDL.h>
+# include "Matrix.hpp"
 
 struct	_Uniform
 {
-	GLint	matrix_pos;
+	GLint	object;
+
+	GLint	matrix_char_pos;
+	GLint	matrix_proj;
+	GLint	matrix_view;
+	GLint	matrix_model;
+
 	GLint	crouch;
 	GLint	screen_ratio;
+
+	GLint	color;
 };
 
 struct	_Shader
@@ -35,20 +44,24 @@ struct	_Shader
 
 struct	VAO
 {
-	GLuint			vao;
-	GLuint			vbo;
+	private :
+		struct _Attribute
+		{
+			GLuint	position_vertex;
+		};
 
-	struct			_Attribute
-	{
-		GLuint	position_vertex;
-	}				att;	/* attributes */
+	public :
+		GLuint		vao;
+		GLuint		vbo;
+		_Attribute	att;
+
+
 };
 
 struct OpenGL
 {
 	public :
 		OpenGL(void);
-
 		SDL_Window		*window;
 		SDL_GLContext	glcontext;
 
@@ -57,6 +70,11 @@ struct OpenGL
 		_Shader			shader;
 		_Uniform		uniform;
 
+		// Matrix			matrix_character;
+		Matrix			matrix_proj;
+		Matrix			matrix_view;
+		Matrix			matrix_model;
+
 		void	init(SDL_Window *window);
 
 	private:
@@ -64,6 +82,7 @@ struct OpenGL
 		void	_init_vao_player(void);
 		void	_init_shader(void);
 		void	_init_uniform(void);
+		void	_init_matrix(void);
 };
 
 #endif
