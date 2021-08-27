@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/19 21:03:42 by pitriche          #+#    #+#             */
-/*   Updated: 2021/08/27 16:09:00 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 16:23:01 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ static void	draw_health(void)
 	unsigned	on;
 
 	tmp_matrix = tmp_matrix.translate((LIFE_BAR / 2) * BAR_PIXEL_SIZE, 1.65f, -3);
-	tmp_matrix = tmp_matrix * (BAR_PIXEL_SIZE / 1.5);
+	tmp_matrix = tmp_matrix * (BAR_PIXEL_SIZE / 1.5f);
 	on = 1;
 	for (unsigned i = 0; i < LIFE_BAR; ++i)
 	{
