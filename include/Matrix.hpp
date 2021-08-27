@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:13:45 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/28 10:02:54 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 16:15:36 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,6 @@ struct Matrix : public std::array<float, 16>
 		Matrix	&operator=(const Matrix &rhs);
 		Matrix	operator*(const Matrix &rhs) const;
 		Matrix	operator*(float rhs) const;
-
-		void	set_i(int i);
-		int		get_i(void);
 
 	private :
 		void	_rotate_x(float angle);

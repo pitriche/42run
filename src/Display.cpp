@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/19 21:03:42 by pitriche          #+#    #+#             */
-/*   Updated: 2021/08/26 12:40:13 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 16:09:00 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,78 @@ void	Display::operator=(const Display &) { }
 
 /* ########################################################################## */
 
-/* update matrices uniforms */
-static void	update_matrices(void)
+static void	draw_number(unsigned n, vec3 pos)
 {
-	// glUniformMatrix4fv(all.gl.uniform.matrix_char_pos, 1, true,
-	// 	all.gl.matrix_character.data());
+	static const unsigned	number[10][15] =
+	{
+		{ 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1 },	/* 0 */
+		{ 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1 },	/* 1 */
+		{ 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1 },	/* 2 */
+		{ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1 },	/* 3 */
+		{ 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1 },	/* 4 */
+		{ 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1 },	/* 5 */
+		{ 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1 },	/* 6 */
+		{ 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1 },	/* 7 */
+		{ 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1 },	/* 8 */
+		{ 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1 }		/* 9 */
+	};
+	Matrix tmp_mat;
+
+	if (n < 0 || n > 9)
+		Utils::error_quit("dumb, imbecile cretin");
+	tmp_mat = tmp_mat * (NUM_PIXEL_SIZE / 2);
+	tmp_mat.translate(pos[0], pos[1], pos[2]);
+	for (unsigned i = 0; i < 15; ++i)
+	{
+		if (i % 3 == 0 && i != 0)
+			tmp_mat.translate(NUM_PIXEL_SIZE * 3, -NUM_PIXEL_SIZE, 0);
+		if (number[n][i])
+			Utils::draw_cube(tmp_mat, NUM_COLOR, NUM_COLOR, NUM_COLOR);
+		tmp_mat.translate(-NUM_PIXEL_SIZE, 0, 0);
+	}
+}
+
+static void	draw_counter(void)
+{
+	vec3	pos;
+
+	pos = { -NUM_PIXEL_SIZE * 13, 1.9f, -3 };
+	pos[0] += NUM_PIXEL_SIZE * 4;
+	draw_number((unsigned)(all.game.distance / 1e0) % 10, pos);
+	pos[0] += NUM_PIXEL_SIZE * 4;
+	draw_number((unsigned)(all.game.distance / 1e1) % 10, pos);
+	pos[0] += NUM_PIXEL_SIZE * 4;
+	draw_number((unsigned)(all.game.distance / 1e2) % 10, pos);
+	pos[0] += NUM_PIXEL_SIZE * 4;
+	draw_number((unsigned)(all.game.distance / 1e3) % 10, pos);
+	pos[0] += NUM_PIXEL_SIZE * 4;
+	draw_number((unsigned)(all.game.distance / 1e4) % 10, pos);
+	pos[0] += NUM_PIXEL_SIZE * 4;
+	draw_number((unsigned)(all.game.distance / 1e5) % 10, pos);
+}
+
+/* ########################################################################## */
+
+static void	draw_health(void)
+{
+	Matrix		tmp_matrix;
+	unsigned	color;
+	unsigned	on;
+
+	tmp_matrix = tmp_matrix.translate((LIFE_BAR / 2) * BAR_PIXEL_SIZE, 1.65f, -3);
+	tmp_matrix = tmp_matrix * (BAR_PIXEL_SIZE / 1.5);
+	on = 1;
+	for (unsigned i = 0; i < LIFE_BAR; ++i)
+	{
+		if (on && i >= all.game.life)
+		{
+			on = 0;
+			tmp_matrix = tmp_matrix * 0.75;
+		}
+		color = on ? 0xff0000 : 0x404040;
+		Utils::draw_cube(tmp_matrix, color, color, color);
+		tmp_matrix.translate(-BAR_PIXEL_SIZE, 0, 0);
+	}
 }
 
 static void	draw_terrain(void)
@@ -120,24 +187,17 @@ static void	draw_character(void)
 	tmp_matrix = tmp_matrix.translate(-0.2f, 0.3f - all.game.crouch, 0);
 	tmp_matrix = tmp_matrix * 0.08f;
 	Utils::draw_cube(tmp_matrix, 0x38b458, 0x38b458, 0x43c464);
-
-	// std::cout << "x>" << all.game.pos_x << " - y>" << all.game.pos_y << std::endl;
 }
 
 void		Display::update(void)
 {
-	update_matrices();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/* draw character */
-	// glBindVertexArray(all.gl.character.vao);
-	// glUniform1i(all.gl.uniform.object, 0);
-	// glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-	glBindVertexArray(all.gl.terrain.vao);
 	draw_terrain();
+	draw_counter();
 	draw_character();
 	draw_sectors();
+	draw_health();
 
 	glFinish();
 	SDL_GL_SwapWindow(this->window);

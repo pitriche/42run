@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:14:54 by pitriche          #+#    #+#             */
-/*   Updated: 2021/08/26 15:37:27 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 16:10:43 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 /* #########################		Sector			######################### */
 /* ########################################################################## */
 
-Sector::Sector(void) : nb(0), pos(50) { }
+Sector::Sector(void) : nb(0), pos(SECTOR_LENGTH) { }
 
 Sector	&Sector::operator=(const Sector &rhs)
 {
@@ -28,12 +28,70 @@ Sector	&Sector::operator=(const Sector &rhs)
 	return (*this);
 }
 
+bool	Sector::check_collision(float pos_x, float pos_y, float crouch)
+{
+	vec3	pos;
+	float	size;
+
+	for (unsigned i = 0; i < this->nb; ++i)
+	{
+		pos = this->cube_pos[i];
+		pos[2] += this->pos;
+		pos[1] += 0.85f - (0.3f - crouch);
+		size = this->cube_size[i] + 0.2f;							/* + character's size */
+		if (pos[2] - size < 0.0f && pos[2] + size > 0.0f)			/* depth */
+			if (pos[0] - size < pos_x && pos[0] + size > pos_x)		/* lateral */
+				if (pos[1] - size < pos_y && pos[1] + size > pos_y)	/* vertical */
+				return (true);
+	}
+	return(false);
+}
+
 /* ########################################################################## */
 /* #########################		Game			######################### */
 /* ########################################################################## */
 
 Game::Game(void) { }
 Game::~Game(void) { }
+
+static void	_push_cube(Sector &sec, enum e_x x, enum e_y y, float z)
+{
+	static const float	eq_x[3] = {-1.5f, 0.0f, 1.5f};
+	static const float	eq_y[5] = {-1.3f, -1.0f, -0.5f, 0.0f, 0.5f};
+
+	if (y != tall)
+		sec.cube_pos.push_back({eq_x[x], eq_y[y], z});
+	else
+	{
+		sec.cube_pos.push_back({eq_x[x], -0.5, z});
+		sec.cube_pos.push_back({eq_x[x], 0.5, z});
+	}
+	
+}
+
+static void	_complete_sector(Sector &sec)
+{
+	sec.nb = (unsigned)sec.cube_pos.size();
+	sec.cube_size.resize(sec.nb);
+	for (float &size : sec.cube_size)
+		size = 0.5f;
+}
+
+static Sector	_random_sector(int nb_cubes)
+{
+	Sector	sec;
+
+	for (unsigned i = 0; i < (unsigned)nb_cubes; ++i)
+	{
+		_push_cube(sec, (enum e_x)(rand() % 3), (enum e_y)(rand() % 5), -rand() % 50);
+		if (sec.cube_pos.back()[0] == 0.0f && sec.cube_pos.back()[1] == 0.5f)
+			sec.cube_pos.pop_back();
+	}
+	_complete_sector(sec);
+	return(sec);
+}
+
+/* ########################################################################## */
 
 void	Game::init(void)
 {
@@ -42,57 +100,37 @@ void	Game::init(void)
 	this->input_left = 0;
 	this->input_right = 0;
 
-	// this->sector.cube_pos.push_back({1, 0, 0});
-	// this->sector.cube_pos.push_back({-1.5, 0, 0});
-	// this->sector.cube_pos.push_back({1.5, 0, -5});
-	// this->sector.cube_pos.push_back({-1.5, 0, -10});
-	// this->sector.cube_pos.push_back({1.5, 0, -15});
-	// this->sector.cube_pos.push_back({-1.5, 0, -20});
-	this->sector.cube_pos.push_back({1.5, 0, -25});
-	this->sector.cube_pos.push_back({-1.5, 0, -30});
-	this->sector.cube_pos.push_back({1.5, 0, -35});
-	this->sector.cube_pos.push_back({-1.5, 0, -40});
-	this->sector.cube_pos.push_back({0, -1, -30});
-	this->sector.cube_pos.push_back({0, -1, -32});
-	this->sector.cube_pos.push_back({0, -1.3, -34});
-	this->sector.cube_pos.push_back({0, -1.3, -36});
-	this->sector.cube_size = {0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f};
-	this->sector.nb = (unsigned)this->sector.cube_pos.size();
+	this->game_speed = Z_SPEED;
+	this->distance = 0.0f;
+
+	this->life = LIFE_BAR;
+
+	this->sector = _random_sector(15);
+	this->sector_next = _random_sector(18);
+	this->sector.pos += 10.0f;
+	this->sector_next.pos += SECTOR_LENGTH + 10.0f;
 }
 
 /* ########################################################################## */
 
-void		Game::_update_matrices(float delta)
+void		Game::_update_sectors(float delta)
 {
-	static float	speed = 4;
+	this->sector.pos -= delta * this->game_speed;
+	this->sector_next.pos -= delta * this->game_speed;
 
-	speed *= 1.02f;
-
-	this->sector.pos -= delta * speed;
-	this->sector_next.pos -= delta * speed;
+	if (this->sector.pos < -6)
+	{
+		this->sector = this->sector_next;
+		this->sector_next = _random_sector(20);
+		this->sector_next.pos += SECTOR_LENGTH;
+	}
 }
 
 bool		Game::_check_collision(void)
 {
-	vec3	pos;
-	float	size;
-
-	for (unsigned i = 0; i < this->sector.nb; ++i)
-	{
-		pos = this->sector.cube_pos[i];
-		pos[2] += this->sector.pos;
-		pos[1] += 0.85f - (0.3 - this->crouch);
-		size = this->sector.cube_size[i] + 0.2f;	/* character's size */
-
-		// std::cout << "pos:"<<pos_y << " min pos:"<<pos[1] - size << " max pos:" << pos[1] + size << std::endl;
-
-		if (pos[2] - size < 0.0f && pos[2] + size > 0.0f)					/* depth */
-			if (pos[0] - size < this->pos_x && pos[0] + size > this->pos_x)	/* lateral */
-				if (pos[1] - size < this->pos_y &&
-					pos[1] + size > this->pos_y)							/* vertical */
-				return (true);
-	}
-	return (false);
+	return (this->sector.check_collision(this->pos_x, this->pos_y, this->crouch)
+		|| this->sector_next.check_collision(this->pos_x, this->pos_y,
+		this->crouch));
 }
 
 /* ########################################################################## */
@@ -147,9 +185,16 @@ void		Game::update(float delta, const Keys &key)
 	if (this->crouch < 0.0f)
 		this->crouch = 0.0f;
 
-	this->_update_matrices(delta);
+	this->_update_sectors(delta);
+
+	this->distance += delta * this->game_speed;
+	this->game_speed += Z_ACCELERATION;
+	
 	if (this->_check_collision())
-		std::cout << "HIT !" << std::endl;
-	else
-		std::cout << "no hit" << std::endl;
+		--(this->life);
+	if (!this->life)
+	{
+		std::cout << "Died ! Score : " << (int)this->distance << std::endl;
+		exit(0);
+	}
 }

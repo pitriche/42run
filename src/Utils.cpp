@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:14:54 by pitriche          #+#    #+#             */
-/*   Updated: 2021/08/26 12:19:33 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 09:02:01 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,6 @@ namespace Utils
 	void	draw_cube(const Matrix &model)
 	{
 		glUniformMatrix4fv(all.gl.uniform.matrix_model, 1, true, model.data());
-		glUniform1i(all.gl.uniform.object, 1);
 		glUniform1i(all.gl.uniform.color, 0x8080ff);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 		glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
@@ -81,7 +80,6 @@ namespace Utils
 		unsigned left_right, unsigned far_near)
 	{
 		glUniformMatrix4fv(all.gl.uniform.matrix_model, 1, true, model.data());
-		glUniform1i(all.gl.uniform.object, 1);
 		glUniform1i(all.gl.uniform.color, (GLint)top_bot);
 		glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
 		glDrawArrays(GL_TRIANGLE_FAN, 12, 4);

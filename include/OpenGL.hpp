@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:13:45 by pitriche          #+#    #+#             */
-/*   Updated: 2021/08/26 12:14:39 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 09:07:42 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,9 @@
 
 struct	_Uniform
 {
-	GLint	object;
-
-	GLint	matrix_char_pos;
 	GLint	matrix_proj;
 	GLint	matrix_view;
 	GLint	matrix_model;
-
-	GLint	crouch;
-	GLint	screen_ratio;
 
 	GLint	color;
 };
@@ -66,11 +60,9 @@ struct OpenGL
 		SDL_GLContext	glcontext;
 
 		VAO				terrain;
-		VAO				character;
 		_Shader			shader;
 		_Uniform		uniform;
 
-		// Matrix			matrix_character;
 		Matrix			matrix_proj;
 		Matrix			matrix_view;
 		Matrix			matrix_model;
@@ -79,7 +71,6 @@ struct OpenGL
 
 	private:
 		void	_init_vao_terrain(void);
-		void	_init_vao_player(void);
 		void	_init_shader(void);
 		void	_init_uniform(void);
 		void	_init_matrix(void);

@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/09 11:14:54 by pitriche          #+#    #+#             */
-/*   Updated: 2021/08/23 11:42:56 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 16:12:07 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,10 +138,6 @@ Matrix	Matrix::operator*(float rhs) const
 {
 	Matrix res;
 
-	// res[0] = rhs;
-	// res[5] = rhs;
-	// res[10] = rhs;
-	// return (res * (*this));
 	res = (*this);
 	res[0] *= rhs;
 	res[5] *= rhs;

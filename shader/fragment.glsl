@@ -1,15 +1,17 @@
 #version 410 core
 
-uniform int		object;
-
 in vec3			color_vertex;
+in float		pos_z_vertex;
+
 
 out vec4		outColor;
 
 void	main()
 {
-	if (object == 0)	/* character */
-		outColor = vec4(1.0, 0.8, 0.8, 1.0);
-	else				/* terrain */
+	if (pos_z_vertex < 10)
 		outColor = vec4(color_vertex, 1.0);
+	else if (pos_z_vertex < 50)
+		outColor = vec4(color_vertex * ((50 - pos_z_vertex) / 40), 1.0);
+	else
+		outColor = vec4(0, 0, 0, 1.0);
 }

@@ -6,7 +6,7 @@
 #    By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/02/07 14:21:44 by pitriche          #+#    #+#              #
-#    Updated: 2021/07/23 11:29:25 by pitriche         ###   ########.fr        #
+#    Updated: 2021/08/27 10:07:08 by pitriche         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,7 +40,7 @@ HEADERS = $(CLASSES_HEADERS) \
 Defines.hpp	\
 
 SRC_FILES = $(CLASSES_SRCS)	\
-main.cpp		\
+main.cpp	\
 
 
 # **************************************************************************** #
@@ -49,8 +49,9 @@ CC = clang++
 
 FL_OPTI = -O3 -flto
 FLAGS = -Wall -Wextra -Wconversion -Wunused -std=c++11 $(FL_OPTI) \
--D 'GL_SILENCE_DEPRECATION='
-# MacOS is a demon spawned low class abomination
+-D 'GL_SILENCE_DEPRECATION'
+# MacOS is a demon spawned low class abomination. There are no words in the
+# tongues of men to describe exactly how much i hate apple for doing this
 
 CFLAGS = -c $(FLAGS)
 

@@ -23,16 +23,7 @@ OpenGL::OpenGL(void) { }
 
 void	OpenGL::_init_vao_terrain(void)
 {
-	/* init and load vao */
-	glGenVertexArrays(1, &this->terrain.vao);
-	glBindVertexArray(this->terrain.vao);
-	std::cout << "Terrain   VAO:[" << this->terrain.vao << "/2] ";
-
-	/* init and fill vbo with cube data */
-	glGenBuffers(1, &this->terrain.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, this->terrain.vbo);
-	std::cout << "VBO:[" << this->terrain.vbo << "/2]" << std::endl;
-	float	tmp_data[] = 
+	float	cube_data[] =
 	{
 		1,	1,	-1,	1,	-1,	-1,	-1,	-1,	-1,	-1,	1,	-1,
 		1,	1,	1,	1,	-1,	1,	-1,	-1,	1,	-1,	1,	1,
@@ -41,42 +32,24 @@ void	OpenGL::_init_vao_terrain(void)
 		-1,	1,	1,	-1,	-1,	1,	-1,	-1,	-1,	-1,	1,	-1,
 		1,	1,	1,	1,	-1,	1,	1,	-1,	-1,	1,	1,	-1,
 	};
-	glBufferData(GL_ARRAY_BUFFER, sizeof(tmp_data), tmp_data, GL_STATIC_DRAW);
+
+	/* init and load vao */
+	glGenVertexArrays(1, &this->terrain.vao);
+	glBindVertexArray(this->terrain.vao);
+	std::cout << "Terrain   VAO:[" << this->terrain.vao << "/1] ";
+
+	/* init and fill vbo with cube data */
+	glGenBuffers(1, &this->terrain.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, this->terrain.vbo);
+	std::cout << "VBO:[" << this->terrain.vbo << "/1]" << std::endl;
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_data), cube_data, GL_STATIC_DRAW);
 
 	/* init attributes */
 	this->terrain.att.position_vertex =
 	(GLuint)glGetAttribLocation(this->shader.program, "position_vertex");
-	glVertexAttribPointer(this->terrain.att.position_vertex, 3, GL_FLOAT, GL_FALSE,
-		sizeof(float) * 3, (void *)(0));
+	glVertexAttribPointer(this->terrain.att.position_vertex, 3, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 3, (void *)(0));
 	glEnableVertexAttribArray(this->terrain.att.position_vertex);
-}
-
-void	OpenGL::_init_vao_player(void)
-{
-	/* init and load vao */
-	glGenVertexArrays(1, &this->character.vao);
-	glBindVertexArray(this->character.vao);
-	std::cout << "Character VAO:[" << this->character.vao << "/1] ";
-
-	/* init and fill vbo */
-	glGenBuffers(1, &this->character.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, this->character.vbo);
-	std::cout << "VBO:[" << this->character.vbo << "/1]" << std::endl;
-	float	tmp_data[] = 
-	{
-		-0.2f,	0.2f,	0.0f,
-		0.2f,	0.2f,	0.0f,
-		0.2f,	-0.2f,	0.0f,
-		-0.2f,	-0.2f,	0.0f
-	};
-	glBufferData(GL_ARRAY_BUFFER, sizeof(tmp_data), tmp_data, GL_STATIC_DRAW);
-
-	/* init attributes */
-	this->character.att.position_vertex =
-	(GLuint)glGetAttribLocation(this->shader.program, "position_vertex");
-	glVertexAttribPointer(this->character.att.position_vertex, 3, GL_FLOAT, GL_FALSE,
-		sizeof(float) * 3, (void *)(0));
-	glEnableVertexAttribArray(this->character.att.position_vertex);
 }
 
 /* ########################################################################## */
@@ -129,20 +102,6 @@ void	OpenGL::_init_shader(void)
 
 void	OpenGL::_init_uniform(void)
 {
-	this->uniform.object = glGetUniformLocation(this->shader.program, "object");
-
-	this->uniform.screen_ratio = glGetUniformLocation(this->shader.program,
-		"screen_ratio");
-	glUniform1f(this->uniform.screen_ratio, WIN_SIZEX / (float)WIN_SIZEY);
-
-	/* character */
-	this->uniform.matrix_char_pos = glGetUniformLocation(this->shader.program,
-		"matrix_char_pos");
-	this->uniform.crouch = glGetUniformLocation(this->shader.program,
-		"crouch");
-	glUniform1i(this->uniform.crouch, 0);
-
-	/* terrain */
 	this->uniform.matrix_proj = glGetUniformLocation(this->shader.program,
 		"matrix_proj");
 	this->uniform.matrix_view = glGetUniformLocation(this->shader.program,
@@ -157,7 +116,6 @@ void	OpenGL::_init_uniform(void)
 void	OpenGL::_init_matrix(void)
 {
 	this->matrix_model = Matrix();
-	
 
 	/* set the camera to face positive Z and stand back */
 	this->matrix_view = Matrix();
@@ -167,9 +125,8 @@ void	OpenGL::_init_matrix(void)
 	this->matrix_proj.set_projection((float)M_PI * CAMERA_FOV / 360.0f,
 		CAMERA_NEAR, CAMERA_FAR, (float)WIN_SIZEX / WIN_SIZEY);
 
-	glUniformMatrix4fv(this->uniform.matrix_model, 1, 0,
+	glUniformMatrix4fv(this->uniform.matrix_model, 1, true,
 		this->matrix_model.data());
-
 	glUniformMatrix4fv(this->uniform.matrix_view, 1, true,
 		this->matrix_view.data());
 	glUniformMatrix4fv(this->uniform.matrix_proj, 1, true,
@@ -184,12 +141,12 @@ void	OpenGL::init(SDL_Window *window)
 {
 	/* create OpenGL context */
 	this->glcontext = SDL_GL_CreateContext(window);
-	printf("Supported OpenGL version: %s\nUsing OpenGL %d.%d\n\n",
-		glGetString(GL_VERSION), OPENGL_VERSION_MAJOR, OPENGL_VERSION_MINOR);
+	std::cout << "Supported OpenGL version: " << glGetString(GL_VERSION) <<
+		std::endl << "Using OpenGL " << OPENGL_VERSION_MAJOR << '.' <<
+		OPENGL_VERSION_MINOR << std::endl << std::endl;
 
 	this->_init_shader();
 	this->_init_uniform();
-	this->_init_vao_player();
 	this->_init_vao_terrain();
 	this->_init_matrix();
 

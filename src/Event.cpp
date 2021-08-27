@@ -6,7 +6,7 @@
 /*   By: pitriche <pitriche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/19 21:03:42 by pitriche          #+#    #+#             */
-/*   Updated: 2021/07/19 15:32:50 by pitriche         ###   ########.fr       */
+/*   Updated: 2021/08/27 16:09:36 by pitriche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ void	Event::_keychange(SDL_Keycode kc, unsigned key_state)
 {
 	switch (kc)
 	{
-		// ADD WASD SUPPORT
 		case (SDLK_w): this->key.w = key_state; break;
 		case (SDLK_UP): this->key.up = key_state; break;
 		case (SDLK_LEFT): case (SDLK_a):
@@ -42,13 +41,10 @@ void	Event::_keychange(SDL_Keycode kc, unsigned key_state)
 		
 		case (SDLK_s):
 			this->key.s = key_state; 
-			glUniform1i(all.gl.uniform.crouch, (GLint)key_state);
 			break;
 		case (SDLK_DOWN):
 			this->key.down = key_state;
-			glUniform1i(all.gl.uniform.crouch, (GLint)key_state);
 			break;
-
 		case (SDLK_ESCAPE): exit(0); break;
 	}
 }
